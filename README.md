@@ -1,0 +1,2 @@
+# DiscountsApi
+Calculating Discounts Exercise
