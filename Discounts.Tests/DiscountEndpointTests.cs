@@ -8,7 +8,7 @@ namespace Discounts.Tests;
 public class DiscountEndpointTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
 {
     [Fact]
-    public async Task CalculateDiscount_ExampleRequest_ReturnsExpectedResponse()
+    public async Task CalculateDiscount_ValidRequest_Returns200Response()
     {
         var client = factory.CreateClient();
 
@@ -19,6 +19,22 @@ public class DiscountEndpointTests(WebApplicationFactory<Program> factory) : ICl
         var expectedResponseJson = File.ReadAllText("Responses\\ExampleResponse1.json");
 
         Assert.Equal(HttpStatusCode.OK, reponseMessage.StatusCode);
+
+        AssertJsonEqual(expectedResponseJson, actualResponseJson);
+    }
+
+    [Fact]
+    public async Task CalculateDiscount_ProductDoesntExist_Returns400Response()
+    {
+        var client = factory.CreateClient();
+
+        var requestJson = File.ReadAllText("Requests\\ExampleRequest2-ProductDoesntExist.json");
+        var reponseMessage = await client.PostAsync("/discounts/calculate", new StringContent(requestJson, Encoding.UTF8, "application/json"));
+
+        var actualResponseJson = await reponseMessage.Content.ReadAsStringAsync();
+        var expectedResponseJson = File.ReadAllText("Responses\\ExampleResponse2-ProductDoesntExist.json");
+
+        Assert.Equal(HttpStatusCode.BadRequest, reponseMessage.StatusCode);
 
         AssertJsonEqual(expectedResponseJson, actualResponseJson);
     }

@@ -1,0 +1,22 @@
+{
+  "CustomerId": "8e4e8991-aaee-495b-9f24-52d5d0e509c5",
+  "LoyaltyCard": "CTX0000001",
+  "TransactionDate": "03-Jan-2020",
+  "Basket": [
+    {
+      "ProductId": "PRD01",
+      "UnitPrice": "1.2",
+      "Quantity": "3"
+    },
+    {
+      "ProductId": "PRD02",
+      "UnitPrice": "2.0",
+      "Quantity": "2"
+    },
+    {
+      "ProductId": "HAMSTERS",
+      "UnitPrice": "105.0",
+      "Quantity": "3"
+    }
+  ]
+}

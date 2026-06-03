@@ -4,5 +4,5 @@ namespace Discounts.Api.Services;
 
 public interface IDiscountsService
 {
-    Task<DiscountInfo> CalculateDiscountInfo(Transaction transaction);
+    Task<Result<DiscountInfo>> CalculateDiscountInfo(Transaction transaction);
 }

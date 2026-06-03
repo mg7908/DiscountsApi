@@ -26,7 +26,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Requests\ExampleRequest2-ProductDoesntExist.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Requests\ExampleRequest1.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Responses\ExampleResponse2-ProductDoesntExist.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Responses\ExampleResponse1.json">

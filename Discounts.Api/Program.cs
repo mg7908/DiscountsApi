@@ -1,8 +1,9 @@
-using Discounts.Api.Contracts.Requests;
 using Discounts.Api.Contracts.Mappers;
+using Discounts.Api.Contracts.Requests;
 using Discounts.Api.Db;
-using Discounts.Api.Services;
 using Discounts.Api.Repositories;
+using Discounts.Api.Services;
+using Discounts.Api.Services.Models;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,7 @@ builder.Services.AddDbContext<DiscountsDbContext>(options =>
 builder.Services.AddScoped<IDiscountsService, DiscountsService>();
 builder.Services.AddScoped<IRepository, Repository>();
 
+builder.Services.AddMemoryCache();
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.PropertyNamingPolicy = null;
@@ -29,9 +31,16 @@ using (var scope = app.Services.CreateScope())
 
 app.MapPost("/discounts/calculate", async (IDiscountsService discountsService, DiscountRequest request) =>
 {
-    var discountInfo = await discountsService.CalculateDiscountInfo(request.ToTransaction());
+    Transaction transaction;
 
-    return Results.Ok(discountInfo.ToResponse());
+    try { transaction = request.ToTransaction(); }
+    catch (FormatException) { return Results.BadRequest(new { error = "The input data was not in the correct format." }); }
+
+    var discountInfoResult = await discountsService.CalculateDiscountInfo(transaction);
+
+    return discountInfoResult.Value is null
+        ? Results.BadRequest(new { error = discountInfoResult.Error })
+        : Results.Ok(discountInfoResult.Value.ToResponse());
 });
 
 app.Run();

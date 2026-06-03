@@ -6,12 +6,17 @@ namespace Discounts.Api.Services;
 
 public class DiscountsService(IRepository repository) : IDiscountsService
 {
-    public async Task<DiscountInfo> CalculateDiscountInfo(Transaction transaction)
+    public async Task<Result<DiscountInfo>> CalculateDiscountInfo(Transaction transaction)
     {
         decimal totalAmount = 0, totalDiscountApplied = 0, grandTotal = 0, totalQualifyingPointsSpend = 0;
 
         // Get the product info for all the products in the transaction
-        var dbProducts = (await repository.GetProducts(transaction.Basket.Select(p => p.ProductId))).ToDictionary(x => x.Id);
+        var dbProducts = await repository.GetProducts(transaction.Basket.Select(p => p.ProductId));
+        if (dbProducts.Count != transaction.Basket.Select(x => x.ProductId).Distinct().Count())
+        {
+            return new Result<DiscountInfo>("The following products are not valid: " + 
+                string.Join(',', transaction.Basket.Select(x => x.ProductId).Where(x => !dbProducts.Keys.Contains(x))));
+        }
 
         // Get the current points promo and discount promo, if any
         var pointsPromotion = await repository.GetPointsPromotionAsOf(transaction.TransactionDate);
@@ -29,14 +34,14 @@ public class DiscountsService(IRepository repository) : IDiscountsService
             totalQualifyingPointsSpend += qualifyingPointsSpend;
         }
 
-        return new DiscountInfo(transaction.CustomerId,
+        return new Result<DiscountInfo>(new DiscountInfo(transaction.CustomerId,
             transaction.LoyaltyCard,
             transaction.TransactionDate,
             totalAmount,
             totalDiscountApplied,
             grandTotal,
             (int)Math.Floor(totalQualifyingPointsSpend) * (pointsPromotion?.PointsPerDollarSpent ?? 0)
-        );
+        ));
     }
 
     private static decimal CalculateDiscountApplied(DiscountPromotion discountPromotion, BasketItem basketItem)
